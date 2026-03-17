@@ -1,0 +1,11 @@
+# Core A2A SDK — includes grpc subpackage
+a2a-sdk>=0.2.9
+
+# Gemini SDK
+google-genai>=1.0.0
+
+# gRPC runtime
+grpcio>=1.64.0
+
+# HTTP server for agent card + JSON-RPC transport
+uvicorn[standard]>=0.30.0

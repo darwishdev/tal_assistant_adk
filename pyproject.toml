@@ -1,0 +1,20 @@
+[project]
+name = "tal-assistant-adk"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "a2a-sdk>=0.3.25",
+    "adk-redis[sessions]>=0.0.3",
+    "agent-memory-client>=0.14.0",
+    "google-adk>=1.27.1",
+    "google-genai>=1.67.0",
+    "grpcio>=1.78.0",
+    "grpcio-reflection>=1.78.0",
+    "python-dotenv>=1.2.2",
+    "redis>=7.3.0",
+    "redisvl>=0.16.0",
+    "uvicorn>=0.41.0",
+    "websockets>=15.0.1",
+]
