@@ -1,0 +1,312 @@
+{
+  "description": "Test scenarios for realistic conversation flow with alternating answer quality",
+  "scenarios": [
+    {
+      "name": "NLP Experience - Shallow to Deep",
+      "turns": [
+        {
+          "turn": 1,
+          "history": [
+            {
+              "type": "question",
+              "text": "Tell me about your experience with NLP.",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I have worked on several NLP projects.",
+              "timestamp": "00:00:15,000"
+            }
+          ],
+          "expected_strategy": "FOLLOW_UP",
+          "reason": "First answer is vague - needs follow-up"
+        },
+        {
+          "turn": 2,
+          "history": [
+            {
+              "type": "question",
+              "text": "Tell me about your experience with NLP.",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I have worked on several NLP projects.",
+              "timestamp": "00:00:15,000"
+            },
+            {
+              "type": "question",
+              "text": "Can you describe a specific NLP project in detail?",
+              "timestamp": "00:00:20,000"
+            },
+            {
+              "type": "answer",
+              "text": "I built a multilingual clinical text classification system for pharmaceutical companies. Used ensemble of BERT-based models fine-tuned on medical domain data achieving 92% F1-score across 5 languages. The system processes 10K documents per hour and integrates with their existing workflow via REST API. We handled class imbalance using focal loss and implemented active learning for continuous improvement.",
+              "timestamp": "00:00:35,000"
+            }
+          ],
+          "expected_strategy": "PREDEFINED",
+          "reason": "Thorough answer with details - ready to move to next topic"
+        },
+        {
+          "turn": 3,
+          "history": [
+            {
+              "type": "question",
+              "text": "Tell me about your experience with NLP.",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I have worked on several NLP projects.",
+              "timestamp": "00:00:15,000"
+            },
+            {
+              "type": "question",
+              "text": "Can you describe a specific NLP project in detail?",
+              "timestamp": "00:00:20,000"
+            },
+            {
+              "type": "answer",
+              "text": "I built a multilingual clinical text classification system for pharmaceutical companies. Used ensemble of BERT-based models fine-tuned on medical domain data achieving 92% F1-score across 5 languages. The system processes 10K documents per hour and integrates with their existing workflow via REST API. We handled class imbalance using focal loss and implemented active learning for continuous improvement.",
+              "timestamp": "00:00:35,000"
+            },
+            {
+              "type": "question",
+              "text": "Have you worked with model monitoring in production?",
+              "timestamp": "00:00:50,000"
+            },
+            {
+              "type": "answer",
+              "text": "Yes, I have experience with production monitoring.",
+              "timestamp": "00:00:55,000"
+            }
+          ],
+          "expected_strategy": "FOLLOW_UP",
+          "reason": "New topic but shallow answer - needs follow-up"
+        }
+      ]
+    },
+    {
+      "name": "MLOps Journey - Progressive Depth",
+      "turns": [
+        {
+          "turn": 1,
+          "history": [
+            {
+              "type": "question",
+              "text": "What's your approach to MLOps?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I follow best practices for continuous integration and deployment.",
+              "timestamp": "00:00:14,000"
+            }
+          ],
+          "expected_strategy": "FOLLOW_UP",
+          "reason": "Generic answer lacking concrete details"
+        },
+        {
+          "turn": 2,
+          "history": [
+            {
+              "type": "question",
+              "text": "What's your approach to MLOps?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I follow best practices for continuous integration and deployment.",
+              "timestamp": "00:00:14,000"
+            },
+            {
+              "type": "question",
+              "text": "Can you walk me through your CI/CD pipeline for ML models?",
+              "timestamp": "00:00:20,000"
+            },
+            {
+              "type": "answer",
+              "text": "We use GitHub Actions for CI - runs unit tests, integration tests, and model validation tests on every PR. Training jobs run on Kubernetes with Ray for distributed compute. Models are versioned in MLflow with experiment tracking. CD pipeline automatically deploys to staging after tests pass, then requires manual approval for production. We use Seldon Core for model serving with canary deployments - new models get 10% traffic initially. Monitor prediction drift, data quality, and business metrics in real-time with custom Prometheus exporters and alert on anomalies.",
+              "timestamp": "00:00:55,000"
+            }
+          ],
+          "expected_strategy": "PREDEFINED",
+          "reason": "Comprehensive technical answer with specific tools and workflow"
+        },
+        {
+          "turn": 3,
+          "history": [
+            {
+              "type": "question",
+              "text": "What's your approach to MLOps?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I follow best practices for continuous integration and deployment.",
+              "timestamp": "00:00:14,000"
+            },
+            {
+              "type": "question",
+              "text": "Can you walk me through your CI/CD pipeline for ML models?",
+              "timestamp": "00:00:20,000"
+            },
+            {
+              "type": "answer",
+              "text": "We use GitHub Actions for CI - runs unit tests, integration tests, and model validation tests on every PR. Training jobs run on Kubernetes with Ray for distributed compute. Models are versioned in MLflow with experiment tracking. CD pipeline automatically deploys to staging after tests pass, then requires manual approval for production. We use Seldon Core for model serving with canary deployments - new models get 10% traffic initially. Monitor prediction drift, data quality, and business metrics in real-time with custom Prometheus exporters and alert on anomalies.",
+              "timestamp": "00:00:55,000"
+            },
+            {
+              "type": "question",
+              "text": "How about experience with cloud platforms?",
+              "timestamp": "00:01:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I've used AWS and GCP.",
+              "timestamp": "00:01:13,000"
+            }
+          ],
+          "expected_strategy": "FOLLOW_UP",
+          "reason": "New topic with insufficient detail"
+        }
+      ]
+    },
+    {
+      "name": "Model Performance Discussion",
+      "turns": [
+        {
+          "turn": 1,
+          "history": [
+            {
+              "type": "question",
+              "text": "How do you optimize model performance?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I use various optimization techniques.",
+              "timestamp": "00:00:13,000"
+            }
+          ],
+          "expected_strategy": "FOLLOW_UP",
+          "reason": "Extremely vague, no specifics"
+        },
+        {
+          "turn": 2,
+          "history": [
+            {
+              "type": "question",
+              "text": "How do you optimize model performance?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "I use various optimization techniques.",
+              "timestamp": "00:00:13,000"
+            },
+            {
+              "type": "question",
+              "text": "Can you give me a specific example of optimization work you've done?",
+              "timestamp": "00:00:18,000"
+            },
+            {
+              "type": "answer",
+              "text": "For our computer vision model, I applied mixed precision training with AMP, reducing training time by 40%. Used gradient accumulation to simulate larger batch sizes on limited GPU memory. Implemented model pruning post-training, removing 30% of weights with only 1% accuracy drop. For inference, converted to ONNX and used TensorRT optimization, achieving 5x speedup from 100ms to 20ms per image. Also optimized the data loading pipeline with DALI and prefetching, eliminating GPU idle time.",
+              "timestamp": "00:00:45,000"
+            }
+          ],
+          "expected_strategy": "PREDEFINED",
+          "reason": "Multiple concrete optimization examples with quantified results"
+        }
+      ]
+    },
+    {
+      "name": "Team Leadership Progression",
+      "turns": [
+        {
+          "turn": 1,
+          "history": [
+            {
+              "type": "question",
+              "text": "Have you mentored junior engineers?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "Yes, I've mentored several team members.",
+              "timestamp": "00:00:13,000"
+            }
+          ],
+          "expected_strategy": "FOLLOW_UP",
+          "reason": "Lacks examples and impact"
+        },
+        {
+          "turn": 2,
+          "history": [
+            {
+              "type": "question",
+              "text": "Have you mentored junior engineers?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "Yes, I've mentored several team members.",
+              "timestamp": "00:00:13,000"
+            },
+            {
+              "type": "question",
+              "text": "Tell me about a specific mentoring experience and its outcome.",
+              "timestamp": "00:00:18,000"
+            },
+            {
+              "type": "answer",
+              "text": "I mentored a junior ML engineer who joined with strong theoretical knowledge but limited practical experience. Created a structured 3-month ramp-up plan covering our tech stack, ML best practices, and code review process. Paired with them on a real project - sentiment analysis for customer feedback. Taught them experiment tracking, hyperparameter tuning, and production considerations. They successfully deployed their first model after 2 months. Now they're independently handling features and mentoring our newest intern. This experience also helped me document our team's tribal knowledge into a wiki.",
+              "timestamp": "00:00:50,000"
+            }
+          ],
+          "expected_strategy": "PREDEFINED",
+          "reason": "Complete mentoring story with structure, approach, and measurable outcomes"
+        },
+        {
+          "turn": 3,
+          "history": [
+            {
+              "type": "question",
+              "text": "Have you mentored junior engineers?",
+              "timestamp": "00:00:10,000"
+            },
+            {
+              "type": "answer",
+              "text": "Yes, I've mentored several team members.",
+              "timestamp": "00:00:13,000"
+            },
+            {
+              "type": "question",
+              "text": "Tell me about a specific mentoring experience and its outcome.",
+              "timestamp": "00:00:18,000"
+            },
+            {
+              "type": "answer",
+              "text": "I mentored a junior ML engineer who joined with strong theoretical knowledge but limited practical experience. Created a structured 3-month ramp-up plan covering our tech stack, ML best practices, and code review process. Paired with them on a real project - sentiment analysis for customer feedback. Taught them experiment tracking, hyperparameter tuning, and production considerations. They successfully deployed their first model after 2 months. Now they're independently handling features and mentoring our newest intern. This experience also helped me document our team's tribal knowledge into a wiki.",
+              "timestamp": "00:00:50,000"
+            },
+            {
+              "type": "question",
+              "text": "What about technical leadership in project planning?",
+              "timestamp": "00:01:05,000"
+            },
+            {
+              "type": "answer",
+              "text": "I lead technical planning sessions.",
+              "timestamp": "00:01:08,000"
+            }
+          ],
+          "expected_strategy": "FOLLOW_UP",
+          "reason": "New aspect but too brief, needs elaboration"
+        }
+      ]
+    }
+  ]
+}

@@ -153,20 +153,48 @@ FORMAT B — Manual (recruiter-triggered with a guiding prompt):
 YOUR TASK
 ═══════════════════════════════════════════════════════
 
-1. Cross-reference the conversation so far with the job description and resume.
-2. Identify what has already been covered, what is vague, and what critical JD
-   requirements have not yet been probed.
-3. Prioritise questions that:
-   - Verify specific claims in the resume against JD requirements.
-   - Probe for depth on must-have skills that have only been mentioned superficially.
-   - Uncover concrete examples (STAR format) behind general statements.
-   - Explore gaps between the resume and the JD (e.g. production deployment,
-     mentoring, ethical AI, cloud platforms).
-4. If a recruiter PROMPT is given, honour its intent above all else.
-5. Never repeat a question that already appears in the transcript.
+STEP 1: ANALYZE THE LAST ANSWER (if present)
+Check if the candidate's most recent answer contains any of the following:
+- Vague or general statements that lack concrete examples (e.g., "I worked with ML models")
+- Claims that need verification (e.g., "I improved accuracy by 30%")
+- Technical terms mentioned without explanation (e.g., "used LoRA" without details)
+- Contradictions with their resume
+- Incomplete thoughts or statements like "and other things..."
+- Areas where they could demonstrate deeper expertise
+
+STEP 2: DECIDE YOUR STRATEGY
+**STRATEGY A - Follow-up Question (PREFERRED when applicable)**
+If you detected ANY of the above in the last answer, create a targeted follow-up
+question that probes deeper into that specific topic. Examples:
+- "You mentioned improving accuracy by 30% - how did you measure that?"
+- "Can you walk me through a specific example of when you used LoRA?"
+- "What were the specific challenges you faced with that implementation?"
+
+**STRATEGY B - Predefined Question**
+ONLY use a question from the QUESTION BANK if:
+- The last answer was thorough and complete, OR
+- This is the first question of the interview, OR
+- You need to move to a new topic area per the recruiter's PROMPT
+
+STEP 3: GENERATE THE QUESTION
+Follow the existing rules about:
+- Cross-referencing with JD and resume
+- Never repeating questions
+- Honoring recruiter PROMPT if given
+- Prioritizing depth and verification
 
 Respond with ONLY this exact JSON on one line, nothing else:
-{{"next_question": "<the suggested question>", "rationale": "<one sentence why>"}}
+{{"next_question": "<the suggested question>", "rationale": "<explain: follow-up or new topic>", "strategy": "<FOLLOW_UP or PREDEFINED>"}}
+
+EXAMPLES:
+
+Example 1 - Follow-up needed:
+Last answer: "I worked with PyTorch to train models."
+Output: {{"next_question": "Can you describe a specific model architecture you built with PyTorch and the trade-offs you considered?", "rationale": "Answer was too general - probing for concrete example", "strategy": "FOLLOW_UP"}}
+
+Example 2 - Predefined question:
+Last answer: "I used DDP for distributed training across 8 A100 GPUs, implementing gradient accumulation with a global batch size of 512. We had to handle gradient synchronization carefully to avoid bottlenecks, so we used overlapped communication and local batch normalization."
+Output: {{"next_question": "Have you had experience with model deployment and monitoring in production environments?", "rationale": "Previous answer was thorough - moving to new JD requirement (production systems)", "strategy": "PREDEFINED"}}
 
 Do NOT add markdown, code fences, greetings, or any explanation outside the JSON."""
 

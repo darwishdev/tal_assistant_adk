@@ -1,0 +1,209 @@
+{
+  "description": "Test scenarios where answers are incomplete/shallow and should trigger FOLLOW_UP strategy",
+  "scenarios": [
+    {
+      "name": "Vague statement without examples",
+      "history": [
+        {
+          "type": "question",
+          "text": "Tell me about your experience with deep learning frameworks.",
+          "timestamp": "00:00:10,000"
+        },
+        {
+          "type": "answer",
+          "text": "I have worked with various ML models and frameworks.",
+          "timestamp": "00:00:15,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Answer is too vague, lacks concrete examples"
+    },
+    {
+      "name": "Unverified performance claim",
+      "history": [
+        {
+          "type": "question",
+          "text": "Have you optimized model performance before?",
+          "timestamp": "00:01:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "Yes, I improved our model accuracy by 30% through optimization.",
+          "timestamp": "00:01:05,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Claims need verification - how was 30% measured?"
+    },
+    {
+      "name": "Technical term without explanation",
+      "history": [
+        {
+          "type": "question",
+          "text": "How have you fine-tuned large language models?",
+          "timestamp": "00:02:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I used LoRA and PEFT techniques for fine-tuning.",
+          "timestamp": "00:02:10,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Technical terms mentioned but not explained"
+    },
+    {
+      "name": "Incomplete thought with trailing ellipsis",
+      "history": [
+        {
+          "type": "question",
+          "text": "What programming languages are you proficient in?",
+          "timestamp": "00:03:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I'm proficient in Python, SQL, and some other languages...",
+          "timestamp": "00:03:05,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Incomplete answer, needs specifics"
+    },
+    {
+      "name": "Surface-level skills mention",
+      "history": [
+        {
+          "type": "question",
+          "text": "What experience do you have with distributed training?",
+          "timestamp": "00:04:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I have experience with distributed systems and parallel processing.",
+          "timestamp": "00:04:08,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Too general, lacks technical depth"
+    },
+    {
+      "name": "Missing metrics and scale",
+      "history": [
+        {
+          "type": "question",
+          "text": "Tell me about your experience with production systems.",
+          "timestamp": "00:05:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I have deployed several models to production.",
+          "timestamp": "00:05:05,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Lacks specifics about scale, technologies, and challenges"
+    },
+    {
+      "name": "Buzzwords without substance",
+      "history": [
+        {
+          "type": "question",
+          "text": "How do you approach MLOps?",
+          "timestamp": "00:06:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I follow best practices for MLOps including CI/CD and monitoring.",
+          "timestamp": "00:06:07,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Generic buzzwords without concrete implementation details"
+    },
+    {
+      "name": "Unexplained contradiction with resume",
+      "history": [
+        {
+          "type": "question",
+          "text": "I see your resume mentions RAG pipelines. Can you explain your approach?",
+          "timestamp": "00:07:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I've used basic retrieval techniques in some projects.",
+          "timestamp": "00:07:08,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Vague response that contradicts specific resume claims"
+    },
+    {
+      "name": "No context or examples",
+      "history": [
+        {
+          "type": "question",
+          "text": "What's your experience with data pipelines?",
+          "timestamp": "00:08:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I've built data pipelines.",
+          "timestamp": "00:08:03,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Extremely brief with no details about technologies, scale, or challenges"
+    },
+    {
+      "name": "Unsubstantiated expertise claim",
+      "history": [
+        {
+          "type": "question",
+          "text": "How comfortable are you with transformer architectures?",
+          "timestamp": "00:09:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I'm very comfortable with transformers and use them regularly.",
+          "timestamp": "00:09:06,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Claims comfort but provides no evidence or specific examples"
+    },
+    {
+      "name": "Missing problem-solving details",
+      "history": [
+        {
+          "type": "question",
+          "text": "Have you dealt with class imbalance in your projects?",
+          "timestamp": "00:10:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "Yes, I've handled class imbalance issues.",
+          "timestamp": "00:10:04,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Doesn't explain what techniques were used or results achieved"
+    },
+    {
+      "name": "Generic methodology answer",
+      "history": [
+        {
+          "type": "question",
+          "text": "How do you evaluate model performance?",
+          "timestamp": "00:11:00,000"
+        },
+        {
+          "type": "answer",
+          "text": "I use standard metrics and validation techniques.",
+          "timestamp": "00:11:05,000"
+        }
+      ],
+      "expected_strategy": "FOLLOW_UP",
+      "reason": "Too generic, doesn't specify which metrics or why they were chosen"
+    }
+  ]
+}
