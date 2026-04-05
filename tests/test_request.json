@@ -1,0 +1,8 @@
+{
+  "message": {
+    "role": 1,
+    "context_id": "test-ctx-1",
+    "message_id": "test-msg-1",
+    "parts": [{ "text": "Interviewer|00:00:05,000|Where do you see yourself in five years?" }]
+  }
+}
