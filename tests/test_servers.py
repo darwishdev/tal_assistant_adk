@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import sys
+import uuid
 
 import grpc
 from a2a.grpc import a2a_pb2, a2a_pb2_grpc
@@ -207,8 +208,9 @@ async def ping(stub: a2a_pb2_grpc.A2AServiceStub, label: str) -> bool:
 async def test_signal_no_signal(stub: a2a_pb2_grpc.A2AServiceStub):
     """Filler speech should return empty — no signal."""
     print("\n── test: signal / no signal ────────────────────────────────")
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     text    = "INTERVIEWER|00:00:01,000|Hmm, let me think about that for a second."
-    raw     = await send_message(stub, text, "test-nosignal")
+    raw     = await send_message(stub, text, session_id)
     result  = f"EMPTY (correct)" if not raw else f"got: {raw}"
     print(f"  input : {text}")
     print(f"  result: {result}")
@@ -217,8 +219,9 @@ async def test_signal_no_signal(stub: a2a_pb2_grpc.A2AServiceStub):
 async def test_signal_question(stub: a2a_pb2_grpc.A2AServiceStub):
     """A clear question should return a question signal."""
     print("\n── test: signal / question ─────────────────────────────────")
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     text = "INTERVIEWER|00:00:10,000|Can you walk me through how you designed the caching layer?"
-    raw  = await send_message(stub, text, "test-question")
+    raw  = await send_message(stub, text, session_id)
     print(f"  input : {text}")
     if raw:
         try:
@@ -234,8 +237,9 @@ async def test_signal_question(stub: a2a_pb2_grpc.A2AServiceStub):
 async def test_signal_answer(stub: a2a_pb2_grpc.A2AServiceStub):
     """A clear answer should return an answer signal."""
     print("\n── test: signal / answer ───────────────────────────────────")
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     text = "CANDIDATE|00:00:20,000|We used Redis with a write-through strategy and a 5-minute TTL on all keys."
-    raw  = await send_message(stub, text, "test-answer")
+    raw  = await send_message(stub, text, session_id)
     print(f"  input : {text}")
     if raw:
         try:
@@ -251,7 +255,8 @@ async def test_signal_answer(stub: a2a_pb2_grpc.A2AServiceStub):
 async def test_signal_sequence(stub: a2a_pb2_grpc.A2AServiceStub):
     """Run through the full sample sequence and print each result."""
     print("\n── test: signal / full sequence ────────────────────────────")
-    ctx = "test-sequence"
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
+    ctx = session_id
     for speaker, ts, text in SAMPLE_SIGNALS:
         payload = f"{speaker}|{ts}|{text}"
         raw     = await send_message(stub, payload, ctx)
@@ -269,8 +274,9 @@ async def test_signal_sequence(stub: a2a_pb2_grpc.A2AServiceStub):
 async def test_nqi_auto(stub: a2a_pb2_grpc.A2AServiceStub):
     """AUTO trigger with a history list."""
     print("\n── test: NQI / AUTO ────────────────────────────────────────")
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     payload = "AUTO|" + json.dumps({"history": SAMPLE_NQI_HISTORY}, ensure_ascii=False)
-    raw     = await send_message(stub, payload, "test-nqi-auto")
+    raw     = await send_message(stub, payload, session_id)
     print(f"  history entries: {len(SAMPLE_NQI_HISTORY)}")
     if raw:
         try:
@@ -286,12 +292,13 @@ async def test_nqi_auto(stub: a2a_pb2_grpc.A2AServiceStub):
 async def test_nqi_manual(stub: a2a_pb2_grpc.A2AServiceStub):
     """MANUAL trigger with a user prompt and transcript snippet."""
     print("\n── test: NQI / MANUAL ──────────────────────────────────────")
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     transcript = "\n".join(
         f"[{e['timestamp']}] {e['type'].upper()}: {e['text']}"
         for e in SAMPLE_NQI_HISTORY
     )
     payload = f"MANUAL|Dig deeper into the candidate's Redis experience|{transcript}"
-    raw     = await send_message(stub, payload, "test-nqi-manual")
+    raw     = await send_message(stub, payload, session_id)
     print(f"  prompt: Dig deeper into the candidate's Redis experience")
     if raw:
         try:
@@ -307,8 +314,9 @@ async def test_nqi_manual(stub: a2a_pb2_grpc.A2AServiceStub):
 async def test_nqi_bad_input(stub: a2a_pb2_grpc.A2AServiceStub):
     """Bad input should return an error string, not crash."""
     print("\n── test: NQI / bad input ───────────────────────────────────")
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     for bad in ["", "GARBAGE", "AUTO|not-json", "MANUAL|"]:
-        raw = await send_message(stub, bad, "test-nqi-bad")
+        raw = await send_message(stub, bad, session_id)
         print(f"  input={bad!r:25}  response={raw!r}")
 
 
@@ -353,6 +361,7 @@ async def test_nqi_follow_up_scenarios(stub: a2a_pb2_grpc.A2AServiceStub):
     print("=" * 70)
     print("Testing scenarios where answers are incomplete and need follow-up...\n")
     
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     results = []
     for scenario in SHALLOW_ANSWER_SCENARIOS:
         print(f"Scenario: {scenario['name']}")
@@ -362,7 +371,7 @@ async def test_nqi_follow_up_scenarios(stub: a2a_pb2_grpc.A2AServiceStub):
         payload = "AUTO|" + json.dumps({"history": scenario["history"]}, ensure_ascii=False)
         
         # Send to NQI
-        raw = await send_message(stub, payload, f"test-follow-up-{len(results)}")
+        raw = await send_message(stub, payload, session_id)
         print("\n" + "=" * 40)
         print(f"  Raw: {raw}")
         print("\n" + "=" * 40)
@@ -406,6 +415,7 @@ async def test_nqi_next_question_scenarios(stub: a2a_pb2_grpc.A2AServiceStub):
     print("=" * 70)
     print("Testing scenarios where answers are complete and ready for next topic...\n")
     
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     results = []
     for scenario in THOROUGH_ANSWER_SCENARIOS:
         print(f"Scenario: {scenario['name']}")
@@ -415,7 +425,7 @@ async def test_nqi_next_question_scenarios(stub: a2a_pb2_grpc.A2AServiceStub):
         payload = "AUTO|" + json.dumps({"history": scenario["history"]}, ensure_ascii=False)
         
         # Send to NQI
-        raw = await send_message(stub, payload, f"test-predefined-{len(results)}")
+        raw = await send_message(stub, payload, session_id)
         print("\n" + "=" * 40)
         print(f"  Raw: {raw}")
         print("\n" + "=" * 40)
@@ -459,6 +469,7 @@ async def test_nqi_conversation_flow(stub: a2a_pb2_grpc.A2AServiceStub):
     print("=" * 70)
     print("Testing multi-turn conversation with varying answer depth...\n")
     
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     results = []
     for turn_data in CONVERSATION_FLOW_SCENARIO:
         turn = turn_data["turn"]
@@ -476,7 +487,7 @@ async def test_nqi_conversation_flow(stub: a2a_pb2_grpc.A2AServiceStub):
         payload = "AUTO|" + json.dumps({"history": history}, ensure_ascii=False)
         
         # Send to NQI
-        raw = await send_message(stub, payload, f"test-flow-turn-{turn}")
+        raw = await send_message(stub, payload, session_id)
         
         # Validate strategy
         passed, parsed = assert_nqi_strategy(
@@ -517,6 +528,7 @@ async def test_nqi_edge_cases(stub: a2a_pb2_grpc.A2AServiceStub):
     print("TEST: NQI Edge Cases")
     print("=" * 70)
     
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     edge_cases = [
         {
             "name": "Very short answer",
@@ -550,7 +562,7 @@ async def test_nqi_edge_cases(stub: a2a_pb2_grpc.A2AServiceStub):
         print(f"  Reason: {case['reason']}")
         
         payload = "AUTO|" + json.dumps({"history": case["history"]}, ensure_ascii=False)
-        raw = await send_message(stub, payload, f"test-edge-{len(results)}")
+        raw = await send_message(stub, payload, session_id)
         
         passed, parsed = assert_nqi_strategy(raw, case["expected_strategy"], case["name"])
         
@@ -651,6 +663,7 @@ Commands:
 
 
 async def custom_signal(stub: a2a_pb2_grpc.A2AServiceStub):
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     speaker = input("  speaker (e.g. INTERVIEWER): ").strip() or "INTERVIEWER"
     ts      = input("  timestamp (e.g. 00:01:00,000): ").strip() or "00:01:00,000"
     text    = input("  text: ").strip()
@@ -658,7 +671,7 @@ async def custom_signal(stub: a2a_pb2_grpc.A2AServiceStub):
         print("  (empty text, skipped)")
         return
     payload = f"{speaker}|{ts}|{text}"
-    raw     = await send_message(stub, payload, "custom-signal")
+    raw     = await send_message(stub, payload, session_id)
     print(f"  raw response: {raw!r}")
     if raw:
         try:
@@ -668,6 +681,7 @@ async def custom_signal(stub: a2a_pb2_grpc.A2AServiceStub):
 
 
 async def custom_nqi_auto(stub: a2a_pb2_grpc.A2AServiceStub):
+    session_id = f"test-{uuid.uuid4().hex[:8]}"
     question = input("  question: ").strip()
     answer   = input("  answer  : ").strip()
     if not question or not answer:
@@ -678,7 +692,7 @@ async def custom_nqi_auto(stub: a2a_pb2_grpc.A2AServiceStub):
         {"type": "answer",   "text": answer,   "timestamp": "00:00:05,000"},
     ]
     payload  = "AUTO|" + json.dumps({"history": history}, ensure_ascii=False)
-    raw      = await send_message(stub, payload, "custom-nqi")
+    raw      = await send_message(stub, payload, session_id)
     print(f"  raw response: {raw!r}")
     if raw:
         try:
