@@ -21,6 +21,121 @@ log = logging.getLogger(__name__)
 SIGNAL_ADDR = os.environ.get("SIGNAL_ADDR", "localhost:50051")
 NQI_ADDR    = os.environ.get("NQI_ADDR",    "localhost:50052")
 
+# ── Interview Context Data ───────────────────────────────────────────────────
+
+INTERVIEW_CONTEXT_DATA = {
+    "personalized_question_bank": {
+        "categories": [
+            {
+                "category_name": "Frontend Fundamentals",
+                "questions": [
+                    {
+                        "question_text": "Explain the difference between the DOM and the Virtual DOM, and what are the benefits of using a Virtual DOM, particularly in the context of React or Vue.js?",
+                        "rationale": "Tests fundamental understanding of how modern frameworks optimize updates",
+                        "difficulty": "medium"
+                    },
+                    {
+                        "question_text": "Describe the box model in CSS and how it affects layout. Explain the difference between 'content-box' and 'border-box'.",
+                        "rationale": "Tests core CSS knowledge",
+                        "difficulty": "easy"
+                    },
+                    {
+                        "question_text": "How would you optimize a website's performance from a front-end perspective? Consider aspects like loading time, rendering, and perceived performance. Mention specific tools and techniques.",
+                        "rationale": "Assesses knowledge of front-end performance best practices, given resume emphasis",
+                        "difficulty": "medium"
+                    }
+                ]
+            },
+            {
+                "category_name": "Framework Expertise (Vue.js, Nuxt.js, React)",
+                "questions": [
+                    {
+                        "question_text": "You mentioned expertise in Vue.js and Nuxt.js. Can you describe a situation where you chose Nuxt.js over Vue.js for a project, and why?",
+                        "rationale": "Validates expertise and tests understanding of when to use different tools",
+                        "difficulty": "medium"
+                    },
+                    {
+                        "question_text": "Compare and contrast Vuex and React Context. When would you choose one over the other for state management in a large application?",
+                        "rationale": "Tests deeper understanding of state management patterns",
+                        "difficulty": "hard"
+                    },
+                    {
+                        "question_text": "Describe your experience with server-side rendering (SSR) in Nuxt.js. What are the benefits and drawbacks, and how did you handle potential SEO issues?",
+                        "rationale": "Digs into specific experiences claimed in resume",
+                        "difficulty": "medium"
+                    },
+                    {
+                        "question_text": "You mentioned experience with React. What are the key differences between using class components and functional components with hooks?",
+                        "rationale": "Tests React fundamentals and knowledge of modern best practices",
+                        "difficulty": "medium"
+                    }
+                ]
+            },
+            {
+                "category_name": "API Integration and Data Handling",
+                "questions": [
+                    {
+                        "question_text": "Describe your experience with API integration. What strategies do you use for handling asynchronous data and error handling in front-end applications?",
+                        "rationale": "Validates API Integration skill",
+                        "difficulty": "medium"
+                    },
+                    {
+                        "question_text": "Explain the difference between REST and GraphQL APIs, and describe a scenario where you would prefer one over the other. Have you worked with either?",
+                        "rationale": "Tests API knowledge and practical usage",
+                        "difficulty": "medium"
+                    }
+                ]
+            },
+            {
+                "category_name": "Front-End Architecture & System Design",
+                "questions": [
+                    {
+                        "question_text": "Describe a time you contributed to improving the front-end architecture of a large project. What challenges did you face, and how did you address them?",
+                        "rationale": "Explores experience with architecture improvements as noted in resume",   
+                        "difficulty": "hard"
+                    },
+                    {
+                        "question_text": "How would you approach designing a front-end architecture for a complex single-page application (SPA) with multiple teams working on different features concurrently?",   
+                        "rationale": "Tests system design thinking in a front-end context",
+                        "difficulty": "hard"
+                    }
+                ]
+            },
+            {
+                "category_name": "Testing and Debugging",
+                "questions": [
+                    {
+                        "question_text": "What are your preferred methods for testing front-end code? Describe your experience with different testing frameworks and strategies (e.g., unit, integration, end-to-end).",
+                        "rationale": "Validates testing skills",
+                        "difficulty": "medium"
+                    },
+                    {
+                        "question_text": "Describe your approach to debugging front-end performance issues. What tools and techniques do you use to identify bottlenecks and improve rendering speed?",
+                        "rationale": "Validates debugging skill",
+                        "difficulty": "medium"
+                    }
+                ]
+            },
+            {
+                "category_name": "Team Collaboration & Agile Methodologies",
+                "questions": [
+                    {
+                        "question_text": "Describe your experience working in Agile development environments (Scrum, Kanban). How do you contribute to effective team collaboration and communication?",
+                        "rationale": "Checks understanding of agile",
+                        "difficulty": "easy"
+                    },
+                    {
+                        "question_text": "Can you describe a situation where you had to work with a back-end team to resolve a critical issue that was impacting the front-end? How did you approach the problem and ensure effective communication?",
+                        "rationale": "Validates collaboration experience",
+                        "difficulty": "medium"
+                    }
+                ]
+            }
+        ]
+    },
+    "summarized_resume": "Senior Front-End Web Developer with over 4 years of experience specializing in creating high-impact, user-centric web applications. Proficient in developing responsive and engaging interfaces using HTML5, CSS3, JavaScript, and frameworks such as Vue.js, Nuxt.js and React. Proven success in leading large-scale projects for enterprises and governmental entities. Adept at integrating cutting-edge technologies and optimizing front-end performance. Known for exceptional collaboration with back-end teams, driving architectural improvements, and enhancing operational efficiency. Previously held positions at ABC Hotels, Addicta, Nafis Tech, Melon Technologies and several Freelance projects. Education includes a Bachelor's Degree in Computer Science and Artificial Intelligence from Helwan University. Key skills include: HTML5, CSS3, JavaScript, Vue.js, Nuxt.js, React.js, API Integration, Responsive Web Design, Front-End Performance Optimization, and Agile Development methodologies."
+}
+
 # ── Sample data ──────────────────────────────────────────────────────────────
 
 SAMPLE_SIGNALS = [
@@ -203,6 +318,31 @@ async def ping(stub: a2a_pb2_grpc.A2AServiceStub, label: str) -> bool:
         return False
 
 
+async def init_nqi_with_interview_data(stub: a2a_pb2_grpc.A2AServiceStub, 
+                                        session_id: str,
+                                        interview_id: str = "HR-INT-2026-0002") -> bool:
+    """
+    Initialize NQI agent with interview context data.
+    Sends INIT message with the interview_id.
+    Returns True if successful, False otherwise.
+    """
+    try:
+        init_message = f"INIT|{interview_id}"
+        log.info("Initializing NQI session %s with interview_id: %s", session_id, interview_id)
+        
+        raw = await send_message(stub, init_message, session_id)
+        
+        if raw is not None:
+            log.info("✓ NQI initialized for session %s", session_id)
+            return True
+        else:
+            log.warning("NQI initialization returned empty response for session %s", session_id)
+            return True  # null/empty is expected for INIT
+    except Exception as e:
+        log.error("Failed to initialize NQI session %s: %s", session_id, str(e))
+        return False
+
+
 # ── Individual tests ─────────────────────────────────────────────────────────
 
 async def test_signal_no_signal(stub: a2a_pb2_grpc.A2AServiceStub):
@@ -275,6 +415,10 @@ async def test_nqi_auto(stub: a2a_pb2_grpc.A2AServiceStub):
     """AUTO trigger with a history list."""
     print("\n── test: NQI / AUTO ────────────────────────────────────────")
     session_id = f"test-{uuid.uuid4().hex[:8]}"
+    
+    # Initialize NQI with interview context
+    await init_nqi_with_interview_data(stub, session_id)
+    
     payload = "AUTO|" + json.dumps({"history": SAMPLE_NQI_HISTORY}, ensure_ascii=False)
     raw     = await send_message(stub, payload, session_id)
     print(f"  history entries: {len(SAMPLE_NQI_HISTORY)}")
@@ -293,6 +437,10 @@ async def test_nqi_manual(stub: a2a_pb2_grpc.A2AServiceStub):
     """MANUAL trigger with a user prompt and transcript snippet."""
     print("\n── test: NQI / MANUAL ──────────────────────────────────────")
     session_id = f"test-{uuid.uuid4().hex[:8]}"
+    
+    # Initialize NQI with interview context
+    await init_nqi_with_interview_data(stub, session_id)
+    
     transcript = "\n".join(
         f"[{e['timestamp']}] {e['type'].upper()}: {e['text']}"
         for e in SAMPLE_NQI_HISTORY
@@ -362,6 +510,12 @@ async def test_nqi_follow_up_scenarios(stub: a2a_pb2_grpc.A2AServiceStub):
     print("Testing scenarios where answers are incomplete and need follow-up...\n")
     
     session_id = f"test-{uuid.uuid4().hex[:8]}"
+    
+    # Initialize NQI with interview context
+    if not await init_nqi_with_interview_data(stub, session_id):
+        print("❌ Failed to initialize NQI session. Aborting test.")
+        return []
+    
     results = []
     for scenario in SHALLOW_ANSWER_SCENARIOS:
         print(f"Scenario: {scenario['name']}")
@@ -416,6 +570,12 @@ async def test_nqi_next_question_scenarios(stub: a2a_pb2_grpc.A2AServiceStub):
     print("Testing scenarios where answers are complete and ready for next topic...\n")
     
     session_id = f"test-{uuid.uuid4().hex[:8]}"
+    
+    # Initialize NQI with interview context
+    if not await init_nqi_with_interview_data(stub, session_id):
+        print("❌ Failed to initialize NQI session. Aborting test.")
+        return []
+    
     results = []
     for scenario in THOROUGH_ANSWER_SCENARIOS:
         print(f"Scenario: {scenario['name']}")
@@ -470,6 +630,12 @@ async def test_nqi_conversation_flow(stub: a2a_pb2_grpc.A2AServiceStub):
     print("Testing multi-turn conversation with varying answer depth...\n")
     
     session_id = f"test-{uuid.uuid4().hex[:8]}"
+    
+    # Initialize NQI with interview context
+    if not await init_nqi_with_interview_data(stub, session_id):
+        print("❌ Failed to initialize NQI session. Aborting test.")
+        return []
+    
     results = []
     for turn_data in CONVERSATION_FLOW_SCENARIO:
         turn = turn_data["turn"]
@@ -529,6 +695,12 @@ async def test_nqi_edge_cases(stub: a2a_pb2_grpc.A2AServiceStub):
     print("=" * 70)
     
     session_id = f"test-{uuid.uuid4().hex[:8]}"
+    
+    # Initialize NQI with interview context
+    if not await init_nqi_with_interview_data(stub, session_id):
+        print("❌ Failed to initialize NQI session. Aborting test.")
+        return []
+    
     edge_cases = [
         {
             "name": "Very short answer",
@@ -682,6 +854,11 @@ async def custom_signal(stub: a2a_pb2_grpc.A2AServiceStub):
 
 async def custom_nqi_auto(stub: a2a_pb2_grpc.A2AServiceStub):
     session_id = f"test-{uuid.uuid4().hex[:8]}"
+    
+    # Initialize NQI with interview context
+    print("  Initializing NQI session...")
+    await init_nqi_with_interview_data(stub, session_id)
+    
     question = input("  question: ").strip()
     answer   = input("  answer  : ").strip()
     if not question or not answer:

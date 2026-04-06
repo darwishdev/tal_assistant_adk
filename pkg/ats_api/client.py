@@ -4,6 +4,7 @@ ATS API Client
 HTTP client for fetching interview data from Mawhub ATS.
 """
 import logging
+import os
 from typing import Optional
 import httpx
 from .models import InterviewData, QuestionBank, Question
@@ -84,14 +85,16 @@ class AtsApiClient:
         data = await client.get_interview_details("HR-INT-2026-0001")
     """
 
-    def __init__(self, base_url: str = "http://localhost:8000", timeout: float = 30.0):
+    def __init__(self, base_url: str | None = None, timeout: float = 30.0):
         """
         Initialize ATS API client.
         
         Args:
-            base_url: Base URL of the ATS API server
+            base_url: Base URL of the ATS API server (defaults to ATS_BASE_URL env var or http://localhost:8000)
             timeout: Request timeout in seconds
         """
+        if base_url is None:
+            base_url = os.environ.get("ATS_BASE_URL", "http://localhost:8000")
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._client: Optional[httpx.AsyncClient] = None
@@ -214,13 +217,13 @@ class AtsApiClient:
 
 
 # Convenience function for one-off requests
-async def fetch_interview(interview_name: str, base_url: str = "http://localhost:8000") -> InterviewData:
+async def fetch_interview(interview_name: str, base_url: str | None = None) -> InterviewData:
     """
     Fetch interview details using a one-off client.
     
     Args:
         interview_name: Interview identifier (e.g., "HR-INT-2026-0001")
-        base_url: Base URL of the ATS API server
+        base_url: Base URL of the ATS API server (defaults to ATS_BASE_URL env var or http://localhost:8000)
         
     Returns:
         InterviewData object with all interview information

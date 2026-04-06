@@ -44,7 +44,7 @@ async def test_predefined_flow(interview_id: str, session_id: str = "test-predef
     """
     
     async with grpc.aio.insecure_channel(f"localhost:{NQI_GRPC_PORT}") as channel:
-        stub = a2a_pb2_grpc.AgentCardServiceStub(channel)
+        stub = a2a_pb2_grpc.A2AServiceStub(channel)
         
         print("\n" + "="*80)
         print("TESTING PREDEFINED STRATEGY - QUESTION BANK FLOW")
@@ -56,12 +56,13 @@ async def test_predefined_flow(interview_id: str, session_id: str = "test-predef
         
         message = a2a_pb2.Message(
             role=a2a_pb2.Role.ROLE_USER,
-            parts=[a2a_pb2.Part(text=init_message)]
+            context_id=session_id,
+            message_id=f"msg-init-{id(init_message)}",
+            content=[a2a_pb2.Part(text=init_message)]
         )
         
         request = a2a_pb2.SendMessageRequest(
-            session_id=session_id,
-            message=message
+            request=message
         )
         
         response = await stub.SendMessage(request)
@@ -75,25 +76,39 @@ async def test_predefined_flow(interview_id: str, session_id: str = "test-predef
         
         message = a2a_pb2.Message(
             role=a2a_pb2.Role.ROLE_USER,
-            parts=[a2a_pb2.Part(text=auto_message)]
+            context_id=session_id,
+            message_id=f"msg-auto-{id(auto_message)}",
+            content=[a2a_pb2.Part(text=auto_message)]
         )
         
         request = a2a_pb2.SendMessageRequest(
-            session_id=session_id,
-            message=message
+            request=message
         )
         
         response = await stub.SendMessage(request)
         
         # Extract response
-        if response and response.message and response.message.parts:
+        if response and response.msg and response.msg.content:
             import json
             response_text = ""
-            for part in response.message.parts:
+            for part in response.msg.content:
                 if part.text:
                     response_text += part.text
             
-            result = json.loads(response_text)
+            response_text = response_text.strip()
+            
+            if not response_text or response_text.lower() == "null":
+                print(f"\n❌ ERROR: Received empty or null response")
+                print(f"   Response text: '{response_text}'")
+                return
+            
+            try:
+                result = json.loads(response_text)
+            except json.JSONDecodeError as e:
+                print(f"\n❌ ERROR: Failed to parse JSON response")
+                print(f"   Response text: {response_text}")
+                print(f"   Error: {e}")
+                return
             
             print("\n" + "-"*80)
             print("RESPONSE:")
@@ -120,23 +135,34 @@ async def test_predefined_flow(interview_id: str, session_id: str = "test-predef
                 # Send another AUTO trigger
                 message = a2a_pb2.Message(
                     role=a2a_pb2.Role.ROLE_USER,
-                    parts=[a2a_pb2.Part(text=auto_message)]
+                    context_id=session_id,
+                    message_id=f"msg-auto-{i}-{id(auto_message)}",
+                    content=[a2a_pb2.Part(text=auto_message)]
                 )
                 
                 request = a2a_pb2.SendMessageRequest(
-                    session_id=session_id,
-                    message=message
+                    request=message
                 )
                 
                 response = await stub.SendMessage(request)
                 
-                if response and response.message and response.message.parts:
+                if response and response.msg and response.msg.content:
                     response_text = ""
-                    for part in response.message.parts:
+                    for part in response.msg.content:
                         if part.text:
                             response_text += part.text
                     
-                    result = json.loads(response_text)
+                    response_text = response_text.strip()
+                    
+                    if not response_text or response_text.lower() == "null":
+                        print(f"    ⚠️  Received empty/null response")
+                        continue
+                    
+                    try:
+                        result = json.loads(response_text)
+                    except json.JSONDecodeError:
+                        print(f"    ⚠️  Invalid JSON response: {response_text[:50]}...")
+                        continue
                     
                     if result.get('metadata'):
                         metadata = result['metadata']

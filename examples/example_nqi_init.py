@@ -43,7 +43,7 @@ async def init_nqi_session(interview_id: str, session_id: str = "test-session-00
     
     # Connect to NQI gRPC server
     async with grpc.aio.insecure_channel(f"localhost:{NQI_GRPC_PORT}") as channel:
-        stub = a2a_pb2_grpc.AgentCardServiceStub(channel)
+        stub = a2a_pb2_grpc.A2AServiceStub(channel)
         
         # Build INIT request
         # Format: "INIT|{interview_id}"
@@ -54,12 +54,13 @@ async def init_nqi_session(interview_id: str, session_id: str = "test-session-00
         # Create gRPC request
         message = a2a_pb2.Message(
             role=a2a_pb2.Role.ROLE_USER,
-            parts=[a2a_pb2.Part(text=init_message)]
+            context_id=session_id,
+            message_id=f"msg-init-{id(init_message)}",
+            content=[a2a_pb2.Part(text=init_message)]
         )
         
         request = a2a_pb2.SendMessageRequest(
-            session_id=session_id,
-            message=message
+            request=message
         )
         
         # Send request
@@ -67,9 +68,9 @@ async def init_nqi_session(interview_id: str, session_id: str = "test-session-00
             response = await stub.SendMessage(request)
             
             # Extract response text
-            if response and response.message and response.message.parts:
+            if response and response.msg and response.msg.content:
                 response_text = ""
-                for part in response.message.parts:
+                for part in response.msg.content:
                     if part.text:
                         response_text += part.text
                 
