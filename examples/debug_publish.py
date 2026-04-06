@@ -5,8 +5,12 @@ import asyncio
 import json
 import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, "pkg/redis")
+# Add parent directory to Python path so imports work
+parent_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_dir))
+
 from pkg.redis.redis_publisher import get_redis
 
 NQI_CHANNEL    = os.environ.get("NQI_CHANNEL", "nqi:results")

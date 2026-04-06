@@ -9,6 +9,13 @@ import logging
 import json
 import traceback
 import httpx
+import sys
+from pathlib import Path
+
+# Add parent directory to Python path so imports work
+parent_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_dir))
+
 from pkg.ats_api import AtsApiClient
 from pkg.ats_api.session_initializer import SessionInitializer
 

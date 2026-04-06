@@ -37,12 +37,19 @@ The system consists of three main agents:
 **Phase**: During interview  
 **Purpose**: Suggests the best follow-up question after each answer
 
-Three response strategies:
+**Three Trigger Modes**:
+- **INIT**: Initializes session with interview context from Redis (first call)
+- **AUTO**: Automatically triggered after each answer is detected
+- **MANUAL**: Recruiter-triggered with custom prompts
+
+**Three Response Strategies**:
 - **FOLLOW_UP**: Probes deeper when answer is vague or incomplete
 - **CHANGE_QUESTION**: Generates contextual new question when pivoting is valuable
-- **PREDEFINED**: Falls back to question bank for new topic areas
+- **PREDEFINED**: Fetches sequential questions from personalized bank (state-tracked in Redis)
 
-Initialized with personalized context from Question Bank Personalizer.
+Initialized with personalized context from Question Bank Personalizer via INIT mode.
+
+📖 [Full Documentation](next_question_agent/README.md)
 
 ## Project Structure
 
@@ -165,38 +172,86 @@ grpcurl -plaintext -d '{"interview_id": "HR-INT-2026-0001"}' \
   a2a.A2AService/Execute
 ```
 
-#### 2. Run Full Integration
+#### 2. Initialize Next Question Inferrer (Interview Start)
+
+**Via Example Script:**
+```bash
+python examples/example_nqi_init.py HR-INT-2026-0001 session-123
+```
+
+Or programmatically via gRPC:
+
+```python
+# Send INIT request to load interview context
+message = "INIT|HR-INT-2026-0001"
+# Agent fetches personalized data from Redis
+# Response: null (context loaded successfully)
+```
+
+**Prerequisites**: Question Bank Personalizer must have been run first.
+
+#### 3. Run Full Integration
 
 ```bash
 python examples/example_integration_main.py
 ```
 
-#### 3. Test ATS Connection
+#### 4. Test ATS Connection
 
 ```bash
 python examples/diagnose_ats_connection.py
 ```
 
-## Workflow
+## Complete Interview Workflow
 
 ### Pre-Interview Phase
 
 1. **Fetch Interview Data**: ATS API provides job description, candidate resume, original question bank
 2. **Personalize**: Question Bank Personalizer generates tailored questions and resume summary
-3. **Initialize**: Next Question Agent loads personalized context
+3. **Store in Redis**: Personalized data saved with key `personalized_interview:{interview_id}`
+
+```bash
+# Step 1: Personalize question bank (run once per interview)
+python examples/example_question_bank_personalizer.py HR-INT-2026-0001
+
+# This stores in Redis:
+# - personalized_question_bank (15-25 tailored questions)
+# - summarized_resume (300-500 word summary)
+# - interview_data (full ATS data)
+```
+
+### Interview Start Phase
+
+4. **Initialize NQI Session**: Load interview context into Next Question Inferrer
+
+```bash
+# Step 2: Initialize Next Question Inferrer (start of interview)
+python examples/example_nqi_init.py HR-INT-2026-0001 session-123
+
+# Request: "INIT|HR-INT-2026-0001"
+# - Fetches personalized data from Redis
+# - Sends FORMAT A (interview context) to agent
+# - Agent responds: null (context loaded)
+```
 
 ### During Interview Phase
 
-1. **Transcript Monitoring**: Signal Detector monitors live transcript from WebSocket/gRPC
-2. **Signal Detection**: Identifies complete questions and answers
-3. **Publish to Redis**: Detected signals stored and published
-4. **Question Suggestion**: Next Question Inferrer suggests follow-up question
-5. **Display to Recruiter**: Frontend shows suggested question
+5. **Transcript Monitoring**: Signal Detector monitors live transcript from WebSocket/gRPC
+6. **Signal Detection**: Identifies complete questions and answers
+7. **Publish to Redis**: Detected signals stored and published
+8. **Question Suggestion**: Next Question Inferrer suggests follow-up question (AUTO mode)
+9. **Display to Recruiter**: Frontend shows suggested question
 
 ```
-Transcript → Signal Detector → Redis → Next Question Inferrer → UI
-                                 ↓
-                          Session History
+Transcript Stream → Signal Detector → Redis → Next Question Inferrer → UI
+                                        ↓              ↑
+                                 Signal History   Personalized Context
+                                                 (from Redis: INIT mode)
+```
+
+**Manual Override**: Recruiter can send custom prompts anytime:
+```
+MANUAL|Ask about model deployment challenges|[recent transcript]
 ```
 
 ## API Integration

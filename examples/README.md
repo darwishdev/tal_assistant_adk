@@ -21,6 +21,16 @@ This directory contains example scripts and utilities for working with the TAL A
   python examples/example_integration_main.py
   ```
 
+- **`example_nqi_init.py`** - Initialize Next Question Inferrer with interview context from Redis
+  ```bash
+  python examples/example_nqi_init.py HR-INT-2026-0001 test-session-001
+  ```
+
+- **`example_nqi_predefined.py`** - Test PREDEFINED strategy with sequential question bank serving
+  ```bash
+  python examples/example_nqi_predefined.py HR-INT-2026-0001
+  ```
+
 - **`example_session_init.py`** - Example of initializing an interview session with ATS data
   ```bash
   python examples/example_session_init.py

@@ -19,6 +19,11 @@ import asyncio
 import sys
 import json
 import logging
+from pathlib import Path
+
+# Add parent directory to Python path so imports work
+parent_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_dir))
 
 from pkg.redis.redis_publisher import get_personalized_interview_data
 

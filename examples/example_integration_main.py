@@ -7,7 +7,13 @@ application to fetch interview context at session start.
 import asyncio
 import logging
 import os
+import sys
+from pathlib import Path
 from typing import Optional
+
+# Add parent directory to Python path so imports work
+parent_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_dir))
 
 import grpc
 from grpc_reflection.v1alpha import reflection

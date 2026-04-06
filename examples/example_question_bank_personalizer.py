@@ -5,7 +5,7 @@ Demonstrates how to use the question bank personalizer agent
 to generate personalized questions and resume summaries.
 
 Usage:
-    python example_question_bank_personalizer.py
+    python examples/example_question_bank_personalizer.py
 
 Environment Variables:
     ATS_BASE_URL: Base URL of the ATS API (default: http://localhost:8000)
@@ -15,6 +15,11 @@ import asyncio
 import logging
 import os
 import sys
+from pathlib import Path
+
+# Add parent directory to Python path so imports work
+parent_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(parent_dir))
 
 # Setup logging
 logging.basicConfig(
